@@ -61,7 +61,7 @@ pipeline.run_evaluator(
 ```
 ### LLM-as-a-Judge
 ```
-pipeline = EvaluatorPipeline("zhipu")
+pipeline = EvaluatorPipeline("model_type")
 pipeline.run_evaluator(
     eval_type="llm_judge",
     data_path="data/dataset.json",
