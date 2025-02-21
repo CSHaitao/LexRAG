@@ -1,6 +1,8 @@
 from rouge_score import rouge_scorer
 from nltk.translate.bleu_score import sentence_bleu, SmoothingFunction
 from bert_score import score as bert_score
+from nltk.translate.meteor_score import meteor_score
+import nltk
 import jieba
 from transformers import AutoTokenizer
 import numpy as np
@@ -213,3 +215,33 @@ class UnifiedEvaluator:
     def _safe_f1(self, p, r):
         denominator = p + r
         return 2 * p * r / denominator if denominator > 1e-9 else 0.0
+
+    def _clean_text(self, text):
+        text = re.sub(r'[\*\n\r]', '', text) 
+        text = re.sub(r'\s+', ' ', text) 
+        text = text.strip() 
+        return text
+
+    def _preprocess_meteor(self, text):
+        return ' '.join(jieba.cut(text))
+
+    def _get_meteor(self, preds, refs):
+        nltk.download('wordnet')
+        scores = []
+        for p, r in zip(preds, refs):
+            p=self._clean_text(p)
+            r=self._clean_text(r)
+            p_processed = self._preprocess_meteor(p).split()
+            r_processed = self._preprocess_meteor(r).split()
+
+            try:
+                score = meteor_score(
+                    [r_processed],
+                    p_processed
+                )
+                scores.append(score)
+            except Exception as e:
+                print(f"METEOR ERROR: {str(e)}")
+                scores.append(0.0)
+        
+        return {"meteor": round(np.mean(scores).item(), 4)} if scores else {"meteor": 0.0}
