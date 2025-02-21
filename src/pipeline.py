@@ -1,4 +1,4 @@
-from utils.utils import create_generator, create_rewriter, create_evaluator, create_retriever
+from utils.utils import create_generator, create_processor, create_evaluator, create_retriever
 from generate.data_processor import DataProcessor
 from config.config import CONFIG
 import json
@@ -41,28 +41,43 @@ class GeneratorPipeline:
         return llm_data
     
 class ProcessorPipeline:
-    def __init__(self, model_type: str):
-        self.model_type = model_type
-        self.config = CONFIG[model_type]
+
+    def __init__(self, model_type=None, config=None):
+        if config:
+            if isinstance(config, dict):
+                self.config = Config(config_dict=config)
+            else:
+                self.config = config
+        elif model_type:
+            self.config = Config(model_type=model_type)
 
     def run_processor(self, 
-                     original_data_path, 
-                     output_path,
-                     max_retries,
-                     max_parallel,
-                     batch_size):
-        rewriter = create_rewriter(
-            self.model_type,
-            max_retries=max_retries,
-            max_parallel=max_parallel,
-            batch_size=batch_size
-        )
-        rewriter.batch_process(original_data_path, output_path)
+                     process_type: str,
+                     original_data_path: str, 
+                     output_path: str,
+                     max_retries: int = None,
+                     max_parallel: int = None,
+                     batch_size: int = None):
+        
+        if process_type == "rewrite_question":
+            processor = create_processor(
+                "rewrite_question",
+                config=self.config,
+                max_retries=max_retries,
+                max_parallel=max_parallel,
+                batch_size=batch_size
+            )
+            processor.batch_process(original_data_path, output_path)
+        else:
+            processor = create_processor(
+                process_type=process_type
+            )
+            processor.run_process(original_data_path, output_path)
 
 class EvaluatorPipeline:
     def __init__(self, model_type: str = None):
         self.model_type = model_type
-        self.config = CONFIG[model_type] if model_type else None
+        self.config = Config._default_configs[model_type] if model_type else None
 
     def run_evaluator(self, 
                     eval_type,
