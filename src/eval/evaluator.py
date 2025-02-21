@@ -57,6 +57,8 @@ class GenerationEvaluator(BaseEvaluator):
                 metrics_result.update(self.metric_calculator._get_keyword_accuracy(keywords, preds))
             if "char-scores" in metrics:
                 metrics_result.update(self.metric_calculator._get_char_f1(preds, refs))
+            if "meteor" in metrics:
+                metrics_result.update(self.metric_calculator._get_meteor(preds, refs))
             
             turn_num = os.path.splitext(turn_file)[0].split('_')[-1]
             results[turn_num] = {k:v for k,v in metrics_result.items() if k in metrics}
