@@ -253,6 +253,7 @@ You can check the results in ```./data/generated_responses.jsonl```. A sample pr
 
 ## :pencil: Evaluation
 ### Generation Evaluator
+The generation evaluator measures the consistency between generated responses and reference answers, supporting automated metrics like ROUGE, BLEU, METEOR, and BERTScore. Run ```./src/pipeline.py```:
 ```
 pipeline = EvaluatorPipeline()
 pipeline.run_evaluator(
@@ -262,16 +263,11 @@ pipeline.run_evaluator(
     response_file="response_file_path"
     )
 ```
-### LLM-as-a-Judge
-```
-pipeline = EvaluatorPipeline("model_type")
-pipeline.run_evaluator(
-    eval_type="llm_judge",
-    data_path="data/dataset.json",
-    gen_path="generated_responses_path"
-    )
-```
+```--data_path```: the path to original query dataset   
+```--response_file```: the path to LLM's generated responses   
+
 ### Retrieval Evaluator
+The retrieval evaluator assesses the relevance and accuracy of retrieved documents, supporting the calculation of mainstream automated metrics such as NDCG, Recall, MRR, Precision, and F1.
 ```
 pipeline = EvaluatorPipeline()
 pipeline.run_evaluator(
@@ -281,3 +277,23 @@ pipeline.run_evaluator(
     k_values=[1, 3, 5]
     )
 ```
+```--results_path```: the path for retrieval results   
+```--k_values```: consider the highest k scores in the ranking   
+> You can check the results in ```./data/retrieval/report.jsonl```.   
+
+### LLM-as-a-Judge
+LLM judge evaluates response quality through multidimensional chain of thought reasoning. The prompt we used for LLM-as-a-Judge is ```./src/config/template/prompt.txt```
+```
+pipeline = EvaluatorPipeline("model_type")
+pipeline.run_evaluator(
+    eval_type="llm_judge",
+    data_path="data/dataset.json",
+    gen_path="generated_responses_path"
+    )
+```
+```--model_type```: the model as LLM Judge
+```--data_path```: the path to original query dataset   
+```--gen_path```: the path to LLM's generated responses   
+> You can check the results in ```./data/results/turn{turn}/judge_results.jsonl```.  
+
+
