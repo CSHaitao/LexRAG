@@ -18,7 +18,7 @@ they do not support multi-turn conversations and evaluations tailored to the leg
 
 ## :books: Data
 * The data component consists of two key elements: input conversations and corpora.   
-  * The conversation format can be either single-turn or multi-turn. Multi-turn conversations provide previous dialogue history as context.
+  * The conversation format can be either single-turn or multi-turn. Multi-turn conversations provide previous dialogue history as context.   
     The conversation data is stored in ```./data/dataset.json```.   
   * For the corpora, we collect raw data from three different sources. In addition to Legal Articles, which serve as the candidate corpus in this paper, Legal Books and Legal Cases are also included in the toolkit for researchers’ convenience. Specifically, Legal Articles contains 17,228 provisions from various Chinese statutory laws.   
     The corpus is stored in ```./data/law_library.jsonl```.
