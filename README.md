@@ -4,7 +4,7 @@
 
 <h1 align="center">LexRAG: Benchmarking Retrieval-Augmented Generation in Multi-Turn Legal Consultation Conversation</h1>
 <p align="center">
-  :book:<a href="./README.zh.md">中文</a> | 
+  :book:<a href="./README_zh.md">中文</a> | 
   <a href="./README.md">English</a>
 </p>
 Welcome to LexiT, the dedicated toolkit for RAG in the legal domain.
