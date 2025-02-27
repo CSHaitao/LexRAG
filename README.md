@@ -291,7 +291,7 @@ pipeline.run_evaluator(
     gen_path="generated_responses_path"
     )
 ```
-```--model_type```: the model as LLM Judge
+```--model_type```: the model as LLM Judge   
 ```--data_path```: the path to original query dataset   
 ```--gen_path```: the path to LLM's generated responses   
 > You can check the results in ```./data/results/turn{turn}/judge_results.jsonl```.  
