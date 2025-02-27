@@ -10,8 +10,7 @@
 Welcome to LexiT, the dedicated toolkit for RAG in the legal domain.
 
 ## :link: Introduction
-To advance RAG system research in the legal domain, we’ve proposed LexiT, a modular and scalable RAG toolkit for legal researchers. Although there are some general-domain RAG toolkits available,
-they do not support multi-turn conversations and evaluations tailored to the legal domain. LexiT consists of three components: **Data**, **Pipeline**, and **Evaluation**. It integrates all elements of the RAG process into a unified framework and supports standalone applications. This modular design enhances flexibility and allows for high customizability in evaluating different legal scenarios.
+To advance RAG system research in the legal domain, we’ve proposed LexiT, a modular and scalable RAG toolkit for legal researchers. Although there are some general-domain RAG toolkits available, they do not support multi-turn conversations and evaluations tailored to the legal domain. LexiT consists of three components: **Data**, **Pipeline**, and **Evaluation**. It integrates all elements of the RAG process into a unified framework and supports standalone applications. This modular design enhances flexibility and allows for high customizability in evaluating different legal scenarios.
  <div align=center>
 <img src="https://github.com/user-attachments/assets/b2badd1e-55a3-42d8-ae10-758e5f1ae6f0" width="500px">
 </div>
@@ -119,7 +118,8 @@ pipeline.run_retriever(
 )
 ```
 
-> For Dense Retrieval, You can check the index in ```./data/retrieval/law_index_{model_type}.faiss``` and the results in ```./data/retrieval/res/retrieval_{model_type}.jsonl```. A sample retrieve data is ```./data/samples/retrieval_Qwen2-1.5B.jsonl``` which you can see retrieve recall in ```"recall"```.   
+> For Dense Retrieval, You can check the index in ```./data/retrieval/law_index_{model_type}.faiss``` and the results in ```./data/retrieval/res/retrieval_{model_type}.jsonl```. A sample retrieve data is ```./data/samples/retrieval_Qwen2-1.5B.jsonl``` which you can see retrieve recall in ```"recall"```.
+
 > For Sparse Retrieval, You can check the index in ```./data/retrieval/pyserini_index```(pyserini) and the results in ```./data/retrieval/res/retrieval_{model_type}_{bm25_backend}.jsonl```.
 
 ### :bookmark_tabs: Generator
