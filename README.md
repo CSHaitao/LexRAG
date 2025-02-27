@@ -9,25 +9,39 @@
 </p>
 Welcome to LexiT, the dedicated toolkit for RAG in the legal domain.
 
-## :link:Introduction
+## :link: Introduction
 To advance RAG system research in the legal domain, we’ve proposed LexiT, a modular and scalable RAG toolkit for legal researchers. Although there are some general-domain RAG toolkits available,
-they do not support multi-turn conversations and evaluations tailored to the legal domain. LexiT consists of three components: Data, Pipeline, and Evaluation. It integrates all elements of the RAG process into a unified framework and supports standalone applications. This modular design enhances flexibility and allows for high customizability in evaluating different legal scenarios.
+they do not support multi-turn conversations and evaluations tailored to the legal domain. LexiT consists of three components: **Data**, **Pipeline**, and **Evaluation**. It integrates all elements of the RAG process into a unified framework and supports standalone applications. This modular design enhances flexibility and allows for high customizability in evaluating different legal scenarios.
  <div align=center>
 <img src="https://github.com/user-attachments/assets/b2badd1e-55a3-42d8-ae10-758e5f1ae6f0" width="500px">
 </div>
 
-## :books:Data
+## :books: Data
 * The data component consists of two key elements: input conversations and corpora.   
-  * The conversation format can be either single-turn or multi-turn. Multi-turn conversations provide previous dialogue history as context.   
-  * For the corpora, we collect raw data from three different sources. In addition to Legal Articles, which serve as the candidate corpus in this paper, Legal Books and Legal Cases are also included in the toolkit for researchers’ convenience. Specifically, Legal Articles contains 17,228 provisions from various Chinese statutory laws. 
+  * The conversation format can be either single-turn or multi-turn. Multi-turn conversations provide previous dialogue history as context.
+    The conversation data is stored in ```./data/dataset.json```.   
+  * For the corpora, we collect raw data from three different sources. In addition to Legal Articles, which serve as the candidate corpus in this paper, Legal Books and Legal Cases are also included in the toolkit for researchers’ convenience. Specifically, Legal Articles contains 17,228 provisions from various Chinese statutory laws.   
+    The corpus is stored in ```./data/law_library.jsonl```.
  <div align=center>
 <img src="https://github.com/user-attachments/assets/5464a404-98c6-45b6-90a8-65b936824cf1" width="350px">
 </div>
-The conversation data is formatted in JSON. An example of a case is:
 
+## :rocket: Pipeline
+### :bookmark_tabs: Processor
+The processor is responsible for converting the conversation into queries used by the retriever. There are several strategies for constructing the query, including using the last question, the entire conversation context, or the entire query history. Run ```./src/pipeline.py``` :
+```
+pipeline = ProcessorPipeline()
+pipeline.run_processor(
+    process_type="process_type",
+    original_data_path="data/dataset.json",
+    output_path="data/current_question.jsonl"
+)
+```
+```--process_type```: ```current_question``` ```prefix_question``` ```prefix_question_answer``` ```suffix_question``` the strategy for constructing the query   
+```--original_data_path```: the path to the conversation data you want to process   
+```--output_path```: the path for output   
 
-## Processor
-Rewrite query
+Moreover, we also predefined a query rewrite strategy, which employs an LLM to integrate all necessary context into a clear, standalone question.
 ```
 pipeline = ProcessorPipeline(model_type="")
 pipeline.run_processor(
@@ -39,20 +53,17 @@ pipeline.run_processor(
     batch_size=20
 )
 ```
-Other different type of constructing the query, including using the last question, the entire conversation context, or the entire query history
-Take ‘using the last question’ as an example.
-```
-pipeline = ProcessorPipeline()
-pipeline.run_processor(
-    process_type="current_question",
-    original_data_path="data/dataset.json",
-    output_path="data/current_question.jsonl"
-)
-```
+```--model_type```: We provide some default models that are stored in ```./src/config/config.py```, which can use by changing the configuration information. If you want to use other models, you can replace ```model_type=""``` with ```config=``` and customise the configuration information.   
+```--max_retries``` ```--max_parallel```: parallel processing parameter   
+```--batch_size```: batch size   
 
-## Retriever
-### Dense Retrieval
-For BGE-base-zh, Qwen2-1.5B, openai(openai can support multiple models)
+You can check the results in ```output_path```. A sample processed data is ```./data/samples/rewrite_question.jsonl``` which you can see processed query in ```"question"```.
+
+### :bookmark_tabs: Retriever
+#### Dense Retrieval
+We support advanced models such as BGE and GTE. Users can encode vectors using locally loaded models or API calls. We employ the ```Faiss``` for index construction which can support three mainstream faiss types: ```FlatIP```, ```HNSW``` and ```IVF```.
+* For API calls
+Run ```./src/pipeline.py``` :
 ```
 openai_config = {
     "api_key": "your_api_key",
@@ -61,41 +72,44 @@ openai_config = {
 pipeline = RetrieverPipeline(config=openai_config)
 pipeline.run_retriever(
     model_type="openai",
-    model_name="text-embedding-3-small",
-    faiss_type="FlatIP",
+    model_name="model_name",
+    faiss_type="faiss_type",
     question_file_path="data/rewrite_question.jsonl",
     law_path="data/law_library.jsonl"
     )
 ```
+```--model_name```: the model for embedding   
+```--question_file_path```: the path for processed queries (by *Processor*)   
+```--law_path```: the path for corpus
+* For loaded models
 ```
 pipeline = RetrieverPipeline()
 pipeline.run_retriever(
-    model_type="Qwen2-1.5B",
-    faiss_type="FlatIP",
+    model_type="BGE-base-zh",
+    faiss_type="faiss_type",
     question_file_path="data/rewrite_question.jsonl",
     law_path="data/law_library.jsonl"
     )
 ```
-Can support three mainstream faiss types: FlatIP, HNSW and IVF.
-### Sparse Retrieval
+```--model_type```: the model for embedding
+
+#### Sparse Retrieval
+For lexical matching, we use the ```Pyserini``` library to implement ```BM25``` and ```QLD``` while supporting ```bm25s``` to implement ```BM25```.   
+* For BM25:
 ```
 pipeline = RetrieverPipeline()
 pipeline.run_retriever(
     model_type="bm25",
-    bm25_backend="bm25s",
+    bm25_backend="bm25_backend",
     question_file_path="data/rewrite_question.jsonl",
     law_path="data/law_library.jsonl"
 )
 ```
-```
-pipeline = RetrieverPipeline()
-pipeline.run_retriever(
-    model_type="bm25",
-    bm25_backend="pyserini",
-    question_file_path="data/rewrite_question.jsonl",
-    law_path="data/law_library.jsonl"
-)
-```
+```--bm25_backend```: ```bm25s``` ```pyserini``` the method for building bm25 index   
+```--question_file_path```: the path for processed queries (by *Processor*)   
+```--law_path```: the path for corpus
+
+* For QLQ:
 ```
 pipeline = RetrieverPipeline()
 pipeline.run_retriever(
@@ -104,37 +118,50 @@ pipeline.run_retriever(
     law_path="data/law_library.jsonl"
 )
 ```
-Support for QLD implemented by the ```pyserini``` library and BM25 implemented by ```bm25s``` or ```pyserini```.
 
-## Generator
+> For Dense Retrieval, You can check the index in ```./data/retrieval/law_index_{model_type}.faiss``` and the results in ```./data/retrieval/res/retrieval_{model_type}.jsonl```. A sample retrieve data is ```./data/samples/retrieval_Qwen2-1.5B.jsonl``` which you can see retrieve recall in ```"recall"```.   
+> For Sparse Retrieval, You can check the index in ```./data/retrieval/pyserini_index```(pyserini) and the results in ```./data/retrieval/res/retrieval_{model_type}_{bm25_backend}.jsonl```.
+
+### :bookmark_tabs: Generator
+We support mainstream LLMs for generating responses. Run ```./src/pipeline.py``` :
 ```
 pipeline = GeneratorPipeline(model_type="")
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
 ```
-Support many common llm models, just enter the model name in model_type (for common models, you need to modify the corresponding api_key and base_url in ```config.py```)   
+```--model_type```: Support common LLMs, just enter the model name in ```model_type``` (for common models, you need to modify the corresponding configuration information in ```./src/config/config.py```)   
+```--raw_data_path```: the path for conversation data which includes queries   
+```--retrieval_data_path```: the path for retrieve data   
+```--max_retries``` ```--max_parallel```: parallel processing parameter   
+```--batch_size```: batch size   
+```--top_n```: use the top_n of the retrieved return laws as references
+
+
+We also support for response generation using ```vllm```, ```huggingface``` and local models.   
+* For ```vllm```
 ```
 custom_config = {
     "model_type": "vllm",
-    "model_path": "lmsys/vicuna-7b-v1.3",
+    "model_path": "vllm_model_path",
     "gpu_num": 2
 }
 pipeline = GeneratorPipeline(model_type="vllm", config=custom_config)
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
 ```
+* For ```huggingface```
 ```
 hf_config = {
     "model_type": "huggingface",
@@ -146,13 +173,14 @@ pipeline = GeneratorPipeline(
 )
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
 ```
+* For local model
 ```
 local_config = {
     "model_type": "local",
@@ -164,14 +192,17 @@ pipeline = GeneratorPipeline(
 )
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
-```
-Support for response generation using ```vllm```, ```huggingface``` and local models.    
+```   
+
+
+We supports flexible customisation of the input prompt. By default we use our defined ```LegalPromptBuilder```, you can choose to use ```CustomSystemPromptBuilder``` to customise the system content, or ```FullCustomPromptBuilder``` for full prompt customisation.   
+* For ```CustomSystemPromptBuilder```:
 ```
 from generate.prompt_builder import LegalPromptBuilder, CustomSystemPromptBuilder, FullCustomPromptBuilder
 custom_prompt = CustomSystemPromptBuilder("请用一句话回答法律问题：")
@@ -181,13 +212,16 @@ pipeline = GeneratorPipeline(
 )
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
 ```
+```--prompt_builder```: you can use ```CustomSystemPromptBuilder(" ")``` customising the system base used by LLM   
+
+* For ```FullCustomPromptBuilder```:
 ```
 def full_custom_builder(history, question, articles):
     return [
@@ -200,16 +234,24 @@ pipeline = GeneratorPipeline(
 )
 pipeline.run_generator(
     raw_data_path="data/dataset.json",
-    retrieval_data_path="data/samples/llm_question_Qwen2-1.5B.jsonl",
+    retrieval_data_path="data/samples/retrieval_Qwen2-1.5B.jsonl",
     max_retries=5,
     max_parallel=32,
     top_n=5,
     batch_size=20
 )
 ```
-Supports customisation of the input prompt. By default we use our defined ```LegalPromptBuilder```, users can choose to use ```CustomSystemPromptBuilder``` to customise the ```system``` content, or they can choose to use ```FullCustomPromptBuilder``` for full prompt customisation.
+```--prompt_builder```: ```FullCustomPromptBuilder``` supports ```history```, ```question```, ```articles``` as input, you can customize the prompt strategy first, and then used it as prompt_builder.   
+> ```history```: conversation history   
+> ```question```: current query for LLM   
+> ```articles```: the retrieved return ```--top_n``` articles as references   
 
-## Evaluator
+You can check the results in ```./data/generated_responses.jsonl```. A sample processed data is ```./data/samples/generated_responses.jsonl```. The ```.jsonl``` file format for each line is as follows:
+```
+{"id": "xxx", "question": "...", "response": "..."}
+```
+
+## :pencil: Evaluation
 ### Generation Evaluator
 ```
 pipeline = EvaluatorPipeline()
