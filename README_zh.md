@@ -10,7 +10,7 @@
 欢迎来到LexiT，一个法律领域的检索增强生成（RAG）专用工具包。
 
 ## :link: Introduction
-为了推进法律领域的 RAG 系统研究，我们为法律研究人员提出了模块化、可扩展的 RAG 工具包 LexiT。虽然目前已有一些通用领域的 RAG 工具包，但它们并不支持多轮对话和针对法律领域的评估。LexiT 由三个部分组成： **Data** **Pipeline** **Evaluation**。它将 RAG 流程的所有要素整合到一个统一的框架中，并支持独立应用。这种模块化设计提高了灵活性，在评估不同的法律情况时具有高度的可定制性。
+为了推进法律领域的 RAG 系统研究，我们为法律研究人员提出了模块化、可扩展的 RAG 工具包 LexiT。虽然目前已有一些通用领域的 RAG 工具包，但它们并不支持多轮对话和针对法律领域的评估。LexiT 由三个部分组成： ```Data``` ```Pipeline``` ```Evaluation```。LexiT将 RAG 流程的所有要素整合到一个统一的框架中，并支持独立应用。这种模块化设计提高了灵活性，在评估不同的法律情况时具有高度的可定制性。
  <div align=center>
 <img src="https://github.com/user-attachments/assets/b2badd1e-55a3-42d8-ae10-758e5f1ae6f0" width="500px">
 </div>
@@ -18,8 +18,8 @@
 ## :books: Data
 * 数据组件由两个关键要素组成：输入对话和语料库   
   * 对话格式可以是单轮对话，也可以是多轮对话。多轮对话提供以前的对话历史作为背景。   
-    我们提供一个确保准确性和专业性的数据集```./data/dataset.json```，包含 1,013 个多轮对话，每个对话有 5 轮问题和回答。   
-  * 对于语料库```./data/law_library.jsonl```，我们从三个不同来源收集原始数据。除了作为本文候选语料库的 “法律条文 ”外，为方便研究人员使用，工具包中还包括 “法律文书 ”和 “法律案例”。具体来说，法律条文包含了中国各种成文法中的 17,228 个条文。   
+    我们提供一个确保准确性和专业性的数据集 ```./data/dataset.json``` ，包含 1,013 个多轮对话，每个对话有 5 轮问题和回答。   
+  * 对于语料库 ```./data/law_library.jsonl``` ，我们从三个不同来源收集原始数据。除了作为本文候选语料库的法律条文外，为方便研究人员使用，工具包中还包括法律文书和法律案例。具体来说，法律条文包含了中国各种成文法中的 17,228 个条文。   
  <div align=center>
 <img src="https://github.com/user-attachments/assets/5464a404-98c6-45b6-90a8-65b936824cf1" width="350px">
 </div>
@@ -51,16 +51,17 @@ pipeline.run_processor(
     batch_size=20
 )
 ```
-```--model_type```: 我们在```./src/config/config.py```中提供了一些默认模型，可以通过更改模型的配置信息进行使用。如果您想使用其他模型，可以将```model_type=""```替换为```config=```，并自定义配置信息。   
+```--model_type```: 我们在 ```./src/config/config.py``` 中提供了一些默认模型，可以通过更改模型的配置信息进行使用。如果您想使用其他模型，可以将 ```model_type=""``` 替换为 ```config=``` ，并自定义配置信息。   
 ```--max_retries``` ```--max_parallel```: 并行处理参数   
 ```--batch_size```: 批次大小   
 
-您可以在 ```output_path```查看输出结果。 以重写查询策略输出结果```./data/samples/rewrite_question.jsonl```为例，您可以在```"question"```中查看处理后查询。   
+您可以在 ```output_path```查看输出结果。 以重写查询策略输出结果 ```./data/samples/rewrite_question.jsonl``` 为例，您可以在 ```"question"``` 中查看处理后查询。   
 
 ### :bookmark_tabs: Retriever
 #### Dense Retrieval
 我们支持 BGE 和 GTE 等高级模型，您可以使用本地加载的模型或 API 调用对向量进行编码。使用```Faiss```进行索引构建，支持三种faiss类型：```FlatIP```、```HNSW```和```IVF```。   
-* 对于API调用
+* 对于API调用   
+
 运行 ```./src/pipeline.py``` :
 ```
 openai_config = {
@@ -78,7 +79,8 @@ pipeline.run_retriever(
 ```
 ```--model_name```: embedding模型名称   
 ```--question_file_path```: 处理后文件路径 (by *Processor*)   
-```--law_path```: 语料库路径
+```--law_path```: 语料库路径   
+
 * 对于加载的模型
 ```
 pipeline = RetrieverPipeline()
@@ -92,7 +94,7 @@ pipeline.run_retriever(
 ```--model_type```: embedding模型名称
 
 #### Sparse Retrieval
-对于词法匹配，我们使用```Pyserini```库实现```BM25``` 和 ```QLD```，同时支持使用```bm25s```实现```BM25```。   
+对于词法匹配，我们使用 ```Pyserini``` 库实现 ```BM25``` 和 ```QLD``` ，同时支持使用 ```bm25s``` 实现 ```BM25``` 。   
 * 对于BM25:
 ```
 pipeline = RetrieverPipeline()
@@ -117,8 +119,9 @@ pipeline.run_retriever(
 )
 ```
 
-> 使用Dense Retrieval, 你可以在 ```./data/retrieval/law_index_{model_type}.faiss``` 查看索引并在 ```./data/retrieval/res/retrieval_{model_type}.jsonl``` 查看输出检索结果。 以GTE_Qwen2-1.5B模型输出结果 ```./data/samples/retrieval_Qwen2-1.5B.jsonl``` 为例，您可以在 ```"recall"``` 查看检索召回结果。   
-> 使用Sparse Retrieval, 你可以在 ```./data/retrieval/pyserini_index```(pyserini) 查看索引并在 ```./data/retrieval/res/retrieval_{model_type}_{bm25_backend}.jsonl```查看输出检索结果。
+> 使用Dense Retrieval, 您可以在 ```./data/retrieval/law_index_{model_type}.faiss``` 查看索引并在 ```./data/retrieval/res/retrieval_{model_type}.jsonl``` 查看输出检索结果。 以GTE_Qwen2-1.5B模型输出结果 ```./data/samples/retrieval_Qwen2-1.5B.jsonl``` 为例，您可以在 ```"recall"``` 查看检索召回结果。
+    
+> 使用Sparse Retrieval, 您可以在 ```./data/retrieval/pyserini_index```(pyserini) 查看索引并在 ```./data/retrieval/res/retrieval_{model_type}_{bm25_backend}.jsonl``` 查看输出检索结果。
 
 ### :bookmark_tabs: Generator
 我们支持主流的LLMs进行回答生成。 运行 ```./src/pipeline.py``` :
@@ -133,7 +136,7 @@ pipeline.run_generator(
     batch_size=20
 )
 ```
-```--model_type```: 支持常用的LLMs，只需要在```model_type```输入模型名称（常用模型已在```./src/config/config.py```中设置，您修改相关配置信息即可使用）   
+```--model_type```: 支持常用的LLMs，只需要在 ```model_type``` 输入模型名称（常用模型已在 ```./src/config/config.py``` 中设置，您修改相关配置信息即可使用）   
 ```--raw_data_path```: 包含问题的对话数据路径   
 ```--retrieval_data_path```: 检索得到的数据路径   
 ```--max_retries``` ```--max_parallel```: 并行处理相关参数   
@@ -199,7 +202,7 @@ pipeline.run_generator(
 ```   
 
 
-我们支持使用灵活自定义的prompt构造。 默认情况使用我们预定义的```LegalPromptBuilder```进行prompt构造，您还可以选择使用```CustomSystemPromptBuilder```自定义prompt的系统角色部分，或者选择```FullCustomPromptBuilder```完全自定义prompt。   
+我们支持使用灵活自定义的prompt构造。 默认情况使用我们预定义的 ```LegalPromptBuilder``` 进行prompt构造，您还可以选择使用 ```CustomSystemPromptBuilder``` 自定义prompt的系统角色部分，或者选择 ```FullCustomPromptBuilder``` 完全自定义prompt。   
 * 对于 ```CustomSystemPromptBuilder```:
 ```
 from generate.prompt_builder import LegalPromptBuilder, CustomSystemPromptBuilder, FullCustomPromptBuilder
@@ -244,7 +247,7 @@ pipeline.run_generator(
 > ```question```: 多轮对话的当前问题   
 > ```articles```: 检索返回结果的 ```--top_n``` 参考法条   
 
-你可以在```./data/generated_responses.jsonl```查看输出。 示例输出 ```./data/samples/generated_responses.jsonl```。 ```.jsonl``` 文件格式如下:
+您可以在 ```./data/generated_responses.jsonl``` 查看输出。 示例输出 ```./data/samples/generated_responses.jsonl```。 ```.jsonl``` 文件格式如下:
 ```
 {"id": "xxx", "question": "...", "response": "..."}
 ```
@@ -277,7 +280,7 @@ pipeline.run_evaluator(
 ```
 ```--results_path```: 检索结果路径   
 ```--k_values```: 考虑分数最高的k个结果   
-> 你可以在 ```./data/retrieval/report.jsonl```查看结果。   
+> 您可以在 ```./data/retrieval/report.jsonl``` 查看结果。   
 
 ### LLM-as-a-Judge
 LLM通过多维思维链推理来评估回答质量。 LLM-as-a-Judge 使用的prompt为 ```./src/config/template/prompt.txt```
@@ -292,4 +295,4 @@ pipeline.run_evaluator(
 ```--model_type```: 评估使用的模型名称   
 ```--data_path```: 原始包含查询问题的数据集路径   
 ```--gen_path```: LLM生成回答的路径   
-> 你可以在 ```./data/results/turn{turn}/judge_results.jsonl```查看结果。  
+> 您可以在 ```./data/results/turn{turn}/judge_results.jsonl``` 查看结果。  
