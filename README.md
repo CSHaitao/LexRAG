@@ -1,5 +1,30 @@
-# LexRAG
-Benchmarking Retrieval-Augmented Generation in Multi-Turn Legal Consultation Conversation
+ <div align=center>
+<img src="https://github.com/user-attachments/assets/3b8c841d-694a-49d2-9629-dd3cbc4f649b" width="210px">
+</div>
+
+<h1 align="center">LexRAG: Benchmarking Retrieval-Augmented Generation in Multi-Turn Legal Consultation Conversation</h1>
+<p align="center">
+  :book:<a href="./README.zh.md">中文</a> | 
+  <a href="./README.md">English</a>
+</p>
+Welcome to LexiT, the dedicated toolkit for RAG in the legal domain.
+
+## :link:Introduction
+To advance RAG system research in the legal domain, we’ve proposed LexiT, a modular and scalable RAG toolkit for legal researchers. Although there are some general-domain RAG toolkits available,
+they do not support multi-turn conversations and evaluations tailored to the legal domain. LexiT consists of three components: Data, Pipeline, and Evaluation. It integrates all elements of the RAG process into a unified framework and supports standalone applications. This modular design enhances flexibility and allows for high customizability in evaluating different legal scenarios.
+ <div align=center>
+<img src="https://github.com/user-attachments/assets/b2badd1e-55a3-42d8-ae10-758e5f1ae6f0" width="500px">
+</div>
+
+## :books:Data
+* The data component consists of two key elements: input conversations and corpora.   
+  * The conversation format can be either single-turn or multi-turn. Multi-turn conversations provide previous dialogue history as context.   
+  * For the corpora, we collect raw data from three different sources. In addition to Legal Articles, which serve as the candidate corpus in this paper, Legal Books and Legal Cases are also included in the toolkit for researchers’ convenience. Specifically, Legal Articles contains 17,228 provisions from various Chinese statutory laws. 
+ <div align=center>
+<img src="https://github.com/user-attachments/assets/5464a404-98c6-45b6-90a8-65b936824cf1" width="350px">
+</div>
+The conversation data is formatted in JSON. An example of a case is:
+
 
 ## Processor
 Rewrite query
