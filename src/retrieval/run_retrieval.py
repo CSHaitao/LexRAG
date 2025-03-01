@@ -36,7 +36,7 @@ class Pipeline:
         queries = [conv["question"]["content"] for d in data for conv in d["conversation"]]
         
         if backend == "bm25s":
-            result_idx_list, scores = retriever.search(corpus, queries, k=10)
+            result_idx_list, scores = retriever.search(corpus, law_path, queries, k=10)
             idx = 0
             for d in data:
                 for conv in d["conversation"]:
