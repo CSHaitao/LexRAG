@@ -75,7 +75,7 @@ class DenseRetriever:
         if faiss_type == "FlatIP":
             index = faiss.IndexFlatIP(dim)
         elif faiss_type == "HNSW":
-            index = faiss.IndexHNSWFlat(dim, 32)
+            index = faiss.IndexHNSWFlat(dim, 64)
         elif faiss_type == "IVF":
             nlist = min(128, int(np.sqrt(len(embeddings))))
             quantizer = faiss.IndexFlatIP(dim)
