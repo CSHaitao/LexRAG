@@ -135,8 +135,14 @@ class RetrievalEvaluator(BaseEvaluator):
         res_list, res_score_list, label_list = [], [], []
         for data in res_data:
             for conv in data["conversation"]:
-                res = [law["article"]["name"] for law in conv["question"]["recall"]]
-                scores = [law["score"] for law in conv["question"]["recall"]]
+                # Sort
+                sorted_recall = sorted(conv["question"]["recall"], 
+                                     key=lambda x: x["score"], 
+                                     reverse=True)
+                
+                res = [law["article"]["name"] for law in sorted_recall]
+                scores = [law["score"] for law in sorted_recall]
+
                 label = conv["article"]
                 res_list.append(res)
                 res_score_list.append(scores)
